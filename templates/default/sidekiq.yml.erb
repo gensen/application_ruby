@@ -1,0 +1,8 @@
+# Options here can still be overridden by cmd line args.
+#   sidekiq -C config.yml
+---
+:namespace: <%= @namespace %>
+:concurrency:  <%= @concurrency %>
+<%- @options.each do |k, v| %>
+<%= k %>: <%= v %>
+<%- end %>
