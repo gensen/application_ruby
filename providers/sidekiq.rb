@@ -58,7 +58,9 @@ action :before_restart do
             :bundler => new_resource.bundler,
             :bundle_command => new_resource.bundle_command,
             :redis_url => new_resource.redis_url,
+            :rabbitmq_url => new_resource.rabbitmq_url,
             :namespace => new_resource.namespace,
+            :mailer_default_url => new_resource.mailer_default_url,
             :rails_env => new_resource.environment_name)
     run_restart false
   end
