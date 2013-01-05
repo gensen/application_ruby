@@ -1,6 +1,73 @@
-#!/bin/bash -l
+#!/bin/bash -l -e
 
-cd <%= @options[:app].path %>/current
+function is_pid_running() {
+    set +e
+    if [ -n $1 ] && kill -0 $1 > /dev/null 2>&1; then
+        echo "yes"
+    fi
+    set -e
+}
 
-exec 2>&1
-exec <%= node[:runit][:chpst_bin] %> -u <%= @options[:app].owner %>:<%= @options[:app].group %> <%= @options[:bundler] ? "#{@options[:bundle_command]} exec" : '' %> <%= @options[:smells_like_rack] ? 'unicorn' : 'unicorn_rails' %> -E <%= @options[:rails_env] %> -c /etc/unicorn/<%= @options[:app].application.name %>.rb
+echo "My pid: $$"
+
+APP_DIR=<%= @options[:app].path %>/current
+
+CUR_PID_FILE=$APP_DIR/tmp/pids/unicorn.pid
+OLD_PID_FILE=$CUR_PID_FILE.oldbin
+
+if [ -e $OLD_PID_FILE ]; then
+    OLD_PID=$(cat $OLD_PID_FILE)
+    echo "Unicorn appears to be restarting: waiting for old master ($OLD_PID) to exit"
+    while [ -n "$(is_pid_running $OLD_PID)" ]; do
+        /bin/echo -n '.'
+        sleep 2
+    done
+fi
+
+if [ -e $CUR_PID_FILE ]; then
+    CUR_PID=$(cat $CUR_PID_FILE)
+    if [ -n "$(is_pid_running $CUR_PID)" ]; then
+        echo "Already running as $CUR_PID"
+        RUNNING=true
+    fi
+fi
+
+if [ ! $RUNNING ]; then
+    echo "Starting unicorn"
+    cd $APP_DIR
+    exec 2>&1
+    exec <%= node[:runit][:chpst_bin] %> \
+        -u <%= @options[:app].owner %>:<%= @options[:app].group %> \
+        <%= @options[:bundler] ? "#{@options[:bundle_command]} exec" : '' %> \
+        <%= @options[:smells_like_rack] ? 'unicorn' : 'unicorn_rails' %> \
+        -E <%= @options[:rails_env] %> \
+        -c /etc/unicorn/<%= @options[:app].application.name %>.rb
+    sleep 2
+    CUR_PID=$(cat $CUR_PID_FILE)
+fi
+
+function restart() {
+    # Tell unicorn to re-exec itself with USR2
+    kill -USR2 $CUR_PID
+    # Wait and then exit -- after runit restarts the script, we'll
+    # wait for the re-exec'd process
+    sleep 2
+    echo "Restarting to supervise new unicorn"
+    exit
+}
+
+function graceful_shutdown() {
+    echo "Requesting graceful shutdown"
+    kill -QUIT $CUR_PID
+}
+
+trap restart HUP QUIT
+trap graceful_shutdown INT TERM
+
+echo "Watching for unicorn ($CUR_PID) exiting"
+while [ -n "$(is_pid_running $CUR_PID)" ]; do
+    /bin/echo -n '.'
+    sleep 2
+done
+
+echo "Unicorn has exited."
