@@ -1,4 +1,4 @@
-#!/bin/bash -l -e
+#!/bin/bash -e
 
 function is_pid_running() {
     set +e
@@ -11,6 +11,8 @@ function is_pid_running() {
 echo "My pid: $$"
 
 APP_DIR=<%= @options[:app].path %>/current
+
+if [ -ne $APP_DIR/tmp/pids ]; then mkdir $APP_DIR/tmp/pids; fi
 
 CUR_PID_FILE=$APP_DIR/tmp/pids/unicorn.pid
 OLD_PID_FILE=$CUR_PID_FILE.oldbin
