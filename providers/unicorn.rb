@@ -58,6 +58,7 @@ action :before_restart do
   unicorn_config "/etc/unicorn/#{new_resource.name}.rb" do
     listen({ new_resource.port => new_resource.options })
     working_directory ::File.join(new_resource.path, 'current')
+    pid ::File.join(new_resource.path, 'current/tmp/pids/unicorn.pid')
     worker_timeout new_resource.worker_timeout
     preload_app new_resource.preload_app
     worker_processes new_resource.worker_processes
