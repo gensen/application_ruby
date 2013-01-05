@@ -41,7 +41,8 @@ if [ ! $RUNNING ]; then
         <%= @options[:bundler] ? "#{@options[:bundle_command]} exec" : '' %> \
         <%= @options[:smells_like_rack] ? 'unicorn' : 'unicorn_rails' %> \
         -E <%= @options[:rails_env] %> \
-        -c /etc/unicorn/<%= @options[:app].application.name %>.rb
+        -c /etc/unicorn/<%= @options[:app].application.name %>.rb \
+        -D
     sleep 2
     CUR_PID=$(cat $CUR_PID_FILE)
 fi
