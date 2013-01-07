@@ -55,6 +55,16 @@ action :before_restart do
 
   new_resource = @new_resource
 
+  directory "#{new_resource.path}/shared/pids" do
+    owner new_resource.owner
+    group new_resource.group
+    mode '0755'
+  end
+
+  link "#{new_resource.path}/current/tmp/pids" do
+    to "#{new_resource.path}/shared/pids"
+  end
+
   unicorn_config "/etc/unicorn/#{new_resource.name}.rb" do
     listen(new_resource.listen || { new_resource.port => new_resource.options })
     working_directory ::File.join(new_resource.path, 'current')
