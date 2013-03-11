@@ -62,7 +62,6 @@ action :before_restart do
             :namespace => new_resource.namespace,
             :mailer_default_url => new_resource.mailer_default_url,
             :rails_env => new_resource.environment_name)
-    run_restart false
   end
 end
 
