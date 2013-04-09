@@ -31,7 +31,7 @@ action :before_deploy do
   end
 
   if results.length == 0
-    if node['roles'].include?(new_resource.role)
+    if node['roles'].include?(new_resource.role) || Chef::Config[:solo]
       results << node
     end
   end
