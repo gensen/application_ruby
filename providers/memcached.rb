@@ -25,7 +25,11 @@ end
 
 action :before_deploy do
 
-  results = search(:node, "role:#{new_resource.role} AND chef_environment:#{node.chef_environment} NOT hostname:#{node['hostname']}")
+  results = []
+  unless Chef::Config[:solo]
+    results = search(:node, "role:#{new_resource.role} AND chef_environment:#{node.chef_environment} NOT hostname:#{node['hostname']}")
+  end
+
   if results.length == 0
     if node['roles'].include?(new_resource.role)
       results << node
