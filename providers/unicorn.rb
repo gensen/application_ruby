@@ -87,6 +87,7 @@ action :before_restart do
 
   runit_service new_resource.name do
     run_template_name 'unicorn'
+    log_template_name 'unicorn'
     owner new_resource.owner if new_resource.owner
     group new_resource.group if new_resource.group
 
