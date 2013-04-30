@@ -52,7 +52,7 @@ action :before_restart do
   new_resource = @new_resource
 
   runit_service "sidekiq-#{new_resource.name}" do
-    template_name "sidekiq"
+    run_template_name "sidekiq"
     log_template_name "sidekiq"
     owner new_resource.owner if new_resource.owner
     group new_resource.group if new_resource.group
