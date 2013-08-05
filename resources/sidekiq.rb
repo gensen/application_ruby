@@ -1,4 +1,4 @@
-include Chef::Resource::ApplicationBase
+include ApplicationCookbook::ResourceBase
 
 attribute :role, :kind_of => [String, NilClass], :default => nil
 attribute :namespace, :kind_of => String, :default => "sidekiq"
