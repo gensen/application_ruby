@@ -30,10 +30,16 @@ action :before_compile do
     new_resource.migration_command command
   end
 
-  new_resource.environment.update({
+  new_resource.environment.merge!({
     "RAILS_ENV" => new_resource.environment_name,
-    "PATH" => [Gem.default_bindir, ENV['PATH']].join(':')
-  })
+  }) { |k, v1, v2| v1 }  # user's environment settings will override
+
+  if new_resource.use_omnibus_ruby
+    Chef::Log.warn("Tying your Application to the Chef Omnibus Ruby is not recommended.")
+    new_resource.environment.merge!({
+      "PATH" => [Gem.default_bindir, ENV['PATH']].join(':')
+    }) { |k, v1, v2| v1 }  # user's environment settings will override
+  end
 
   new_resource.symlink_before_migrate.update({
     "database.yml" => "config/database.yml"
@@ -166,7 +172,7 @@ def create_database_yml
 
   template "#{new_resource.path}/shared/database.yml" do
     source new_resource.database_template || "database.yml.erb"
-    cookbook new_resource.database_template ? new_resource.cookbook_name : "application_ruby"
+    cookbook new_resource.database_template ? new_resource.cookbook_name.to_s : "application_ruby"
     owner new_resource.owner
     group new_resource.group
     mode "644"

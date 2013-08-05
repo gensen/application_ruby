@@ -1,3 +1,30 @@
+## v2.0.0:
+
+### Bug
+
+- [COOK-3306]: Multiple Memory Leaks in Application Cookbook
+- [COOK-3219]: `application_ruby` cookbook bundle install in
+  1.9.3-based omnibus installs 1.9.x gems into ruby 2.0 apps
+
+## v1.1.4:
+
+### Sub-task
+
+- [COOK-2806]: Including `passenger_apache2::mod_rails` does not enable
+  passenger
+
+## v1.1.2:
+
+### Bug
+
+- [COOK-2638]: cookbook attribute is not treated as
+  a string when specifying `database_yml_template`
+
+### Improvement
+
+- [COOK-2525]: application_ruby: split runit template into multiple
+  lines
+
 ## v1.1.0
 
 * [COOK-2362] - `application_ruby` unicorn uses `run_restart`
